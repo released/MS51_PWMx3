@@ -1,2 +1,7 @@
 # MS51_PWMx3
  MS51_PWMx3
+
+update @ 2020/11/10
+
+Add PWM P10 (PWM0) / P11 (PWM1) / P12 (PWM2)
+

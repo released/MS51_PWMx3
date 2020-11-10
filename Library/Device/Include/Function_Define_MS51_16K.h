@@ -5,14 +5,24 @@
 
 extern bit BIT_TMP;
 
-#define TRUE       1
-#define FALSE      0
-        
-#define Disable  0
-#define Enable   1
-        
-#define nop _nop_();
+typedef bit                   BIT;
+typedef unsigned char         UINT8;
+typedef unsigned int          UINT16;
+typedef unsigned long         UINT32;
 
+typedef unsigned char         uint8_t;
+typedef unsigned int          uint16_t;
+typedef unsigned long         uint32_t;
+
+#define Disable  0  
+#define Enable   1  
+                    
+#define TRUE     1  
+#define FALSE    0  
+                    
+#define FAIL     1  
+#define PASS     0  
+                  
 //16 --> 8 x 2
 #define HIBYTE(v1)              ((UINT8)((v1)>>8))                      //v1 is UINT16
 #define LOBYTE(v1)              ((UINT8)((v1)&0xFF))
@@ -37,14 +47,6 @@ extern bit BIT_TMP;
 #define SET_BIT5        0x20
 #define SET_BIT6        0x40
 #define SET_BIT7        0x80
-#define SET_BIT8        0x0100
-#define SET_BIT9        0x0200
-#define SET_BIT10       0x0400
-#define SET_BIT11       0x0800
-#define SET_BIT12       0x1000
-#define SET_BIT13       0x2000
-#define SET_BIT14       0x4000
-#define SET_BIT15       0x8000
 
 #define CLR_BIT0        0xFE
 #define CLR_BIT1        0xFD
@@ -54,26 +56,14 @@ extern bit BIT_TMP;
 #define CLR_BIT5        0xDF
 #define CLR_BIT6        0xBF
 #define CLR_BIT7        0x7F
-#define CLR_BIT8        0xFEFF
-#define CLR_BIT9        0xFDFF
-#define CLR_BIT10       0xFBFF
-#define CLR_BIT11       0xF7FF
-#define CLR_BIT12       0xEFFF
-#define CLR_BIT13       0xDFFF
-#define CLR_BIT14       0xBFFF
-#define CLR_BIT15       0x7FFF
 
-#define FAIL            1
-#define PASS            0
-
-#define nop _nop_();
-
+#define nop _nop_();            ((UINT8)((v1)>>8))   
 /****************************************************************************/
 /* Software loop delay by HIRC, about 3ms 
 /****************************************************************************/
 #define _delay_()                      \
 {                                      \
-  unsigned char data i,j;             \
+  unsigned char data i,j;              \
     for (j=0;j<0x1A;j++)               \
     {                                  \
        for (i=0;i<0xff;i++)            \
@@ -82,7 +72,18 @@ extern bit BIT_TMP;
        }                               \
     }                                  \
 }  
+/*****************************************************************************/
+/*   POR/LVR/BOD Define                                                      */
+/*****************************************************************************/
+#define    ENABLE_BOD               BIT_TMP=EA;EA=0;TA=0xAA;TA=0x55;SFRS=0;TA=0xAA;TA=0x55;BODCON0|=0x80;EA=BIT_TMP
+#define    ENABLE_BOD_RESET         BIT_TMP=EA;EA=0;TA=0xAA;TA=0x55;BODCON0|=0x84;EA=BIT_TMP
+#define    DISABLE_BOD              BIT_TMP=EA;EA=0;TA=0xAA;TA=0x55;SFRS=0;TA=0xAA;TA=0x55;BODCON0&=0x7B;EA=BIT_TMP
+ 
+#define    ENABLE_LVR               BIT_TMP=EA;EA=0;TA=0xAA;TA=0x55;SFRS=1;TA=0xAA;TA=0x55;LVRDIS=0x00;EA=BIT_TMP
+#define    DISABLE_LVR              BIT_TMP=EA;EA=0;TA=0xAA;TA=0x55;SFRS=1;TA=0xAA;TA=0x55;LVRDIS=0x5A;TA=0xAA;TA=0x55;LVRDIS=0xA5;EA=BIT_TMP
 
+#define    ENABLE_POR               BIT_TMP=EA;EA=0;TA=0xAA;TA=0x55;SFRS=1;TA=0xAA;TA=0x55;PORDIS=0x00;EA=BIT_TMP;
+#define    DISABLE_POR              BIT_TMP=EA;EA=0;TA=0xAA;TA=0x55;SFRS=1;TA=0xAA;TA=0x55;PORDIS=0x5A;TA=0xAA;TA=0x55;PORDIS=0xA5;EA=BIT_TMP
 /*****************************************************************************************
 * IAP function process 
 *****************************************************************************************/
@@ -126,131 +127,119 @@ extern bit BIT_TMP;
 #define    ENABLE_INT0_INTERRUPT         set_IE_EX0
                                          
 #define    ENABLE_TIMER2_INTERRUPT       set_EIE_ET2
-#define    ENABLE_SPI0_INTERRUPT         set_EIE_ESPI0 
+#define    ENABLE_SPI0_INTERRUPT         set_EIE_ESPI 
 #define    ENABLE_PWM0_FB_INTERRUPT      set_EIE_EFB0  
 #define    ENABLE_WDT_INTERRUPT          set_EIE_EWDT  
 #define    ENABLE_PWMM0_INTERRUPT        set_EIE_EPWM0  
 #define    ENABLE_CAPTURE_INTERRUPT      set_EIE_ECAP  
 #define    ENABLE_PIN_INTERRUPT          set_EIE_EPI  
-#define    ENABLE_I2C_INTERRUPT          set_EIE_EI2C0
+#define    ENABLE_I2C_INTERRUPT          set_EIE_EI2C
                                          
-#define    ENABLE_PWM1_FB_INTERRUPT      set_EIE1_ET2
-#define    ENABLE_PWM1_INTERRUPT         set_EIE1_ESPI0
-#define    ENABLE_I2C1_INTERRUPT         set_EIE1_EFB0
-#define    ENABLE_ESPI1_INTERRUPT        set_EIE1_EWDT
-#define    ENABLE_HARDFAULT_INTERRUPT    set_EIE1_EHFI
 #define    ENABLE_WKT_INTERRUPT          set_EIE1_EWKT
-#define    ENABLE_TIMER3_INTERRUPT       set_EIE1_ET3
+#define    ENABLE_TIMER3_INTERRUPT       set_EIE1_ET3    
 #define    ENABLE_UART1_INTERRUPT        set_EIE1_ES_1
+
 /*DISABLE INTERRUPT*/ 
-#define    DISABLE_ADC_INTERRUPT         set_IE_EADC
-#define    DISABLE_BOD_INTERRUPT         set_IE_EBOD
+#define    DISABLE_ADC_INTERRUPT         clr_IE_EADC
+#define    DISABLE_BOD_INTERRUPT         clr_IE_EBOD
 #define    DISABLE_UART0_INTERRUPT       clr_IE_ES
 #define    DISABLE_TIMER1_INTERRUPT      clr_IE_ET1
 #define    DISABLE_INT1_INTERRUPT        clr_IE_EX1
 #define    DISABLE_TIMER0_INTERRUPT      clr_IE_ET0
 #define    DISABLE_INT0_INTERRUPT        clr_IE_EX0
           
-#define    DISABLE_TIMER2_INTERRUPT      clr_EIE0_ET2
-#define    DISABLE_SPI0_INTERRUPT        clr_EIE0_ESPI0 
-#define    DISABLE_PWM0_FB_INTERRUPT     clr_EIE0_EFB0  
-#define    DISABLE_WDT_INTERRUPT         clr_EIE0_EWDT  
-#define    DISABLE_PWMM0_INTERRUPT       clr_EIE0_EPWM0  
-#define    DISABLE_CAPTURE_INTERRUPT     clr_EIE0_ECAP  
-#define    DISABLE_PIN_INTERRUPT         clr_EIE0_EPI  
-#define    DISABLE_I2C_INTERRUPT         clr_EIE0_EI2C0
+#define    DISABLE_TIMER2_INTERRUPT      clr_EIE_ET2
+#define    DISABLE_SPI0_INTERRUPT        clr_EIE_ESPI 
+#define    DISABLE_PWM0_FB_INTERRUPT     clr_EIE_EFB0  
+#define    DISABLE_WDT_INTERRUPT         clr_EIE_EWDT  
+#define    DISABLE_PWMM0_INTERRUPT       clr_EIE_EPWM0  
+#define    DISABLE_CAPTURE_INTERRUPT     clr_EIE_ECAP  
+#define    DISABLE_PIN_INTERRUPT         clr_EIE_EPI  
+#define    DISABLE_I2C_INTERRUPT         clr_EIE_EI2C
           
-#define    DISABLE_PWM1_FB_INTERRUPT     clr_EIE1_ET2
-#define    DISABLE_PWM1_INTERRUPT        clr_EIE1_ESPI0
-#define    DISABLE_I2C1_INTERRUPT        clr_EIE1_EFB0
-#define    DISABLE_ESPI1_INTERRUPT       clr_EIE1_EWDT
-#define    DISABLE_HARDFAULT_INTERRUPT   clr_EIE1_EHFI
 #define    DISABLE_WKT_INTERRUPT         clr_EIE1_EWKT
-#define    DISABLE_TIMER3_INTERRUPT      clr_EIE1_ET3
+#define    DISABLE_TIMER3_INTERRUPT      clr_EIE1_ET3    
 #define    DISABLE_UART1_INTERRUPT       clr_EIE1_ES_1
 
 /*****************************************************************************************
 * For GPIO INIT setting 
 *****************************************************************************************/
 //------------------- Define Port as Quasi mode  -------------------
-#define    P00_QUASI_MODE            P0M1&=0xFE;P0M2&=0xFE
-#define    P01_QUASI_MODE            P0M1&=0xFD;P0M2&=0xFD
-#define    P02_QUASI_MODE            P0M1&=0xFB;P0M2&=0xFB
-#define    P03_QUASI_MODE            P0M1&=0xF7;P0M2&=0xF7
-#define    P04_QUASI_MODE            P0M1&=0xEF;P0M2&=0xEF
-#define    P05_QUASI_MODE            P0M1&=0xDF;P0M2&=0xDF
-#define    P06_QUASI_MODE            P0M1&=0xBF;P0M2&=0xBF
-#define    P07_QUASI_MODE            P0M1&=0x7F;P0M2&=0x7F
-#define    P10_QUASI_MODE            P1M1&=0xFE;P1M2&=0xFE
-#define    P11_QUASI_MODE            P1M1&=0xFD;P1M2&=0xFD
-#define    P12_QUASI_MODE            P1M1&=0xFB;P1M2&=0xFB
-#define    P13_QUASI_MODE            P1M1&=0xF7;P1M2&=0xF7
-#define    P14_QUASI_MODE            P1M1&=0xEF;P1M2&=0xEF
-#define    P15_QUASI_MODE            P1M1&=0xDF;P1M2&=0xDF
-#define    P16_QUASI_MODE            P1M1&=0xBF;P1M2&=0xBF
-#define    P17_QUASI_MODE            P1M1&=0x7F;P1M2&=0x7F
-#define    P30_QUASI_MODE            P3M1&=0xFE;P3M2&=0xFE
-#define    ALL_GPIO_QUASI_MODE       P0M1=0;P0M2=0;P1M1=0;P1M2=0;P3M1=0;P3M2=0
+#define    P00_QUASI_MODE            clr_SFRS_SFRPAGE;P0M1&=0xFE;P0M2&=0xFE
+#define    P01_QUASI_MODE            clr_SFRS_SFRPAGE;P0M1&=0xFD;P0M2&=0xFD
+#define    P02_QUASI_MODE            clr_SFRS_SFRPAGE;P0M1&=0xFB;P0M2&=0xFB
+#define    P03_QUASI_MODE            clr_SFRS_SFRPAGE;P0M1&=0xF7;P0M2&=0xF7
+#define    P04_QUASI_MODE            clr_SFRS_SFRPAGE;P0M1&=0xEF;P0M2&=0xEF
+#define    P05_QUASI_MODE            clr_SFRS_SFRPAGE;P0M1&=0xDF;P0M2&=0xDF
+#define    P06_QUASI_MODE            clr_SFRS_SFRPAGE;P0M1&=0xBF;P0M2&=0xBF
+#define    P07_QUASI_MODE            clr_SFRS_SFRPAGE;P0M1&=0x7F;P0M2&=0x7F
+#define    P10_QUASI_MODE            clr_SFRS_SFRPAGE;P1M1&=0xFE;P1M2&=0xFE
+#define    P11_QUASI_MODE            clr_SFRS_SFRPAGE;P1M1&=0xFD;P1M2&=0xFD
+#define    P12_QUASI_MODE            clr_SFRS_SFRPAGE;P1M1&=0xFB;P1M2&=0xFB
+#define    P13_QUASI_MODE            clr_SFRS_SFRPAGE;P1M1&=0xF7;P1M2&=0xF7
+#define    P14_QUASI_MODE            clr_SFRS_SFRPAGE;P1M1&=0xEF;P1M2&=0xEF
+#define    P15_QUASI_MODE            clr_SFRS_SFRPAGE;P1M1&=0xDF;P1M2&=0xDF
+#define    P16_QUASI_MODE            clr_SFRS_SFRPAGE;P1M1&=0xBF;P1M2&=0xBF
+#define    P17_QUASI_MODE            clr_SFRS_SFRPAGE;P1M1&=0x7F;P1M2&=0x7F
+#define    P30_QUASI_MODE            clr_SFRS_SFRPAGE;P3M1&=0xFE;P3M2&=0xFE
+#define    ALL_GPIO_QUASI_MODE       clr_SFRS_SFRPAGE;P0M1=0;P0M2=0;P1M1=0;P1M2=0;P3M1=0;P3M2=0
 //------------------- Define Port as Push Pull mode -------------------
-#define    P00_PUSHPULL_MODE         P0M1&=0xFE;P0M2|=0x01
-#define    P01_PUSHPULL_MODE         P0M1&=0xFD;P0M2|=0x02
-#define    P02_PUSHPULL_MODE         P0M1&=0xFB;P0M2|=0x04
-#define    P03_PUSHPULL_MODE         P0M1&=0xF7;P0M2|=0x08
-#define    P04_PUSHPULL_MODE         P0M1&=0xEF;P0M2|=0x10
-#define    P05_PUSHPULL_MODE         P0M1&=0xDF;P0M2|=0x20
-#define    P06_PUSHPULL_MODE         P0M1&=0xBF;P0M2|=0x40
-#define    P07_PUSHPULL_MODE         P0M1&=0x7F;P0M2|=0x80
-#define    P10_PUSHPULL_MODE         P1M1&=0xFE;P1M2|=0x01
-#define    P11_PUSHPULL_MODE         P1M1&=0xFD;P1M2|=0x02
-#define    P12_PUSHPULL_MODE         P1M1&=0xFB;P1M2|=0x04
-#define    P13_PUSHPULL_MODE         P1M1&=0xF7;P1M2|=0x08
-#define    P14_PUSHPULL_MODE         P1M1&=0xEF;P1M2|=0x10
-#define    P15_PUSHPULL_MODE         P1M1&=0xDF;P1M2|=0x20
-#define    P16_PUSHPULL_MODE         P1M1&=0xBF;P1M2|=0x40
-#define    P17_PUSHPULL_MODE         P1M1&=0x7F;P1M2|=0x80
-#define    P30_PUSHPULL_MODE         P3M1&=0xFE;P3M2|=0x01
-#define    ALL_GPIO_PUSHPULL_MODE    P0M1=0;P0M2=0xFF;P1M1=0;P1M2=0xFF;P3M1=0;P3M2=0xFF
+#define    P00_PUSHPULL_MODE         clr_SFRS_SFRPAGE;P0M1&=0xFE;P0M2|=0x01
+#define    P01_PUSHPULL_MODE         clr_SFRS_SFRPAGE;P0M1&=0xFD;P0M2|=0x02
+#define    P02_PUSHPULL_MODE         clr_SFRS_SFRPAGE;P0M1&=0xFB;P0M2|=0x04
+#define    P03_PUSHPULL_MODE         clr_SFRS_SFRPAGE;P0M1&=0xF7;P0M2|=0x08
+#define    P04_PUSHPULL_MODE         clr_SFRS_SFRPAGE;P0M1&=0xEF;P0M2|=0x10
+#define    P05_PUSHPULL_MODE         clr_SFRS_SFRPAGE;P0M1&=0xDF;P0M2|=0x20
+#define    P06_PUSHPULL_MODE         clr_SFRS_SFRPAGE;P0M1&=0xBF;P0M2|=0x40
+#define    P07_PUSHPULL_MODE         clr_SFRS_SFRPAGE;P0M1&=0x7F;P0M2|=0x80
+#define    P10_PUSHPULL_MODE         clr_SFRS_SFRPAGE;P1M1&=0xFE;P1M2|=0x01
+#define    P11_PUSHPULL_MODE         clr_SFRS_SFRPAGE;P1M1&=0xFD;P1M2|=0x02
+#define    P12_PUSHPULL_MODE         clr_SFRS_SFRPAGE;P1M1&=0xFB;P1M2|=0x04
+#define    P13_PUSHPULL_MODE         clr_SFRS_SFRPAGE;P1M1&=0xF7;P1M2|=0x08
+#define    P14_PUSHPULL_MODE         clr_SFRS_SFRPAGE;P1M1&=0xEF;P1M2|=0x10
+#define    P15_PUSHPULL_MODE         clr_SFRS_SFRPAGE;P1M1&=0xDF;P1M2|=0x20
+#define    P16_PUSHPULL_MODE         clr_SFRS_SFRPAGE;P1M1&=0xBF;P1M2|=0x40
+#define    P17_PUSHPULL_MODE         clr_SFRS_SFRPAGE;P1M1&=0x7F;P1M2|=0x80
+#define    P30_PUSHPULL_MODE         clr_SFRS_SFRPAGE;P3M1&=0xFE;P3M2|=0x01
+#define    ALL_GPIO_PUSHPULL_MODE    clr_SFRS_SFRPAGE;P0M1=0;P0M2=0xFF;P1M1=0;P1M2=0xFF;P3M1=0;P3M2=0xFF
 //------------------- Define Port as Input Only mode -------------------
-#define    P00_INPUT_MODE            P0M1|=0x01;P0M2&=0xFE
-#define    P01_INPUT_MODE            P0M1|=0x02;P0M2&=0xFD
-#define    P02_INPUT_MODE            P0M1|=0x04;P0M2&=0xFB
-#define    P03_INPUT_MODE            P0M1|=0x08;P0M2&=0xF7
-#define    P04_INPUT_MODE            P0M1|=0x10;P0M2&=0xEF
-#define    P05_INPUT_MODE            P0M1|=0x20;P0M2&=0xDF
-#define    P06_INPUT_MODE            P0M1|=0x40;P0M2&=0xBF
-#define    P07_INPUT_MODE            P0M1|=0x80;P0M2&=0x7F
-#define    P10_INPUT_MODE            P1M1|=0x01;P1M2&=0xFE
-#define    P11_INPUT_MODE            P1M1|=0x02;P1M2&=0xFD
-#define    P12_INPUT_MODE            P1M1|=0x04;P1M2&=0xFB
-#define    P13_INPUT_MODE            P1M1|=0x08;P1M2&=0xF7
-#define    P14_INPUT_MODE            P1M1|=0x10;P1M2&=0xEF
-#define    P15_INPUT_MODE            P1M1|=0x20;P1M2&=0xDF
-#define    P16_INPUT_MODE            P1M1|=0x40;P1M2&=0xBF
-#define    P17_INPUT_MODE            P1M1|=0x80;P1M2&=0x7F
-#define    P30_INPUT_MODE            P3M1|=0x01;P3M2&=0xFE
-#define    ALL_GPIO_INPUT_MODE       P0M1=0xFF;P0M2=0;P1M1=0xFF;P1M2=0;P3M1=0xFF;P3M2=0
+#define    P00_INPUT_MODE            clr_SFRS_SFRPAGE;P0M1|=0x01;P0M2&=0xFE
+#define    P01_INPUT_MODE            clr_SFRS_SFRPAGE;P0M1|=0x02;P0M2&=0xFD
+#define    P02_INPUT_MODE            clr_SFRS_SFRPAGE;P0M1|=0x04;P0M2&=0xFB
+#define    P03_INPUT_MODE            clr_SFRS_SFRPAGE;P0M1|=0x08;P0M2&=0xF7
+#define    P04_INPUT_MODE            clr_SFRS_SFRPAGE;P0M1|=0x10;P0M2&=0xEF
+#define    P05_INPUT_MODE            clr_SFRS_SFRPAGE;P0M1|=0x20;P0M2&=0xDF
+#define    P06_INPUT_MODE            clr_SFRS_SFRPAGE;P0M1|=0x40;P0M2&=0xBF
+#define    P07_INPUT_MODE            clr_SFRS_SFRPAGE;P0M1|=0x80;P0M2&=0x7F
+#define    P10_INPUT_MODE            clr_SFRS_SFRPAGE;P1M1|=0x01;P1M2&=0xFE
+#define    P11_INPUT_MODE            clr_SFRS_SFRPAGE;P1M1|=0x02;P1M2&=0xFD
+#define    P12_INPUT_MODE            clr_SFRS_SFRPAGE;P1M1|=0x04;P1M2&=0xFB
+#define    P13_INPUT_MODE            clr_SFRS_SFRPAGE;P1M1|=0x08;P1M2&=0xF7
+#define    P14_INPUT_MODE            clr_SFRS_SFRPAGE;P1M1|=0x10;P1M2&=0xEF
+#define    P15_INPUT_MODE            clr_SFRS_SFRPAGE;P1M1|=0x20;P1M2&=0xDF
+#define    P16_INPUT_MODE            clr_SFRS_SFRPAGE;P1M1|=0x40;P1M2&=0xBF
+#define    P17_INPUT_MODE            clr_SFRS_SFRPAGE;P1M1|=0x80;P1M2&=0x7F
+#define    P30_INPUT_MODE            clr_SFRS_SFRPAGE;P3M1|=0x01;P3M2&=0xFE
+#define    ALL_GPIO_INPUT_MODE       clr_SFRS_SFRPAGE;P0M1=0xFF;P0M2=0;P1M1=0xFF;P1M2=0;P3M1=0xFF;P3M2=0
 //-------------------Define Port as Open Drain mode -------------------
-#define    P00_OPENDRAIN_MODE        P0M1|=0x01;P0M2|=0x01
-#define    P01_OPENDRAIN_MODE        P0M1|=0x02;P0M2|=0x02
-#define    P02_OPENDRAIN_MODE        P0M1|=0x04;P0M2|=0x04
-#define    P03_OPENDRAIN_MODE        P0M1|=0x08;P0M2|=0x08
-#define    P04_OPENDRAIN_MODE        P0M1|=0x10;P0M2|=0x10
-#define    P05_OPENDRAIN_MODE        P0M1|=0x20;P0M2|=0x20
-#define    P06_OPENDRAIN_MODE        P0M1|=0x40;P0M2|=0x40
-#define    P07_OPENDRAIN_MODE        P0M1|=0x80;P0M2|=0x80
-#define    P10_OPENDRAIN_MODE        P1M1|=0x01;P1M2|=0x01
-#define    P11_OPENDRAIN_MODE        P1M1|=0x02;P1M2|=0x02
-#define    P12_OPENDRAIN_MODE        P1M1|=0x04;P1M2|=0x04
-#define    P13_OPENDRAIN_MODE        P1M1|=0x08;P1M2|=0x08
-#define    P14_OPENDRAIN_MODE        P1M1|=0x10;P1M2|=0x10
-#define    P15_OPENDRAIN_MODE        P1M1|=0x20;P1M2|=0x20
-#define    P16_OPENDRAIN_MODE        P1M1|=0x40;P1M2|=0x40
-#define    P17_OPENDRAIN_MODE        P1M1|=0x80;P1M2|=0x80
-#define    P30_OPENDRAIN_MODE        P3M1|=0x01;P3M2|=0x01
-#define    ALL_GPIO_OPENDRAIN_MODE   P0M1=0xFF;P0M2=0xFF;P1M1=0xFF;P1M2=0xFF;P3M1=0xFF;P3M2=0xFF
-
-#define    set_GPIO1    P12=1
-#define    clr_GPIO1    P12=0
+#define    P00_OPENDRAIN_MODE        clr_SFRS_SFRPAGE;P0M1|=0x01;P0M2|=0x01
+#define    P01_OPENDRAIN_MODE        clr_SFRS_SFRPAGE;P0M1|=0x02;P0M2|=0x02
+#define    P02_OPENDRAIN_MODE        clr_SFRS_SFRPAGE;P0M1|=0x04;P0M2|=0x04
+#define    P03_OPENDRAIN_MODE        clr_SFRS_SFRPAGE;P0M1|=0x08;P0M2|=0x08
+#define    P04_OPENDRAIN_MODE        clr_SFRS_SFRPAGE;P0M1|=0x10;P0M2|=0x10
+#define    P05_OPENDRAIN_MODE        clr_SFRS_SFRPAGE;P0M1|=0x20;P0M2|=0x20
+#define    P06_OPENDRAIN_MODE        clr_SFRS_SFRPAGE;P0M1|=0x40;P0M2|=0x40
+#define    P07_OPENDRAIN_MODE        clr_SFRS_SFRPAGE;P0M1|=0x80;P0M2|=0x80
+#define    P10_OPENDRAIN_MODE        clr_SFRS_SFRPAGE;P1M1|=0x01;P1M2|=0x01
+#define    P11_OPENDRAIN_MODE        clr_SFRS_SFRPAGE;P1M1|=0x02;P1M2|=0x02
+#define    P12_OPENDRAIN_MODE        clr_SFRS_SFRPAGE;P1M1|=0x04;P1M2|=0x04
+#define    P13_OPENDRAIN_MODE        clr_SFRS_SFRPAGE;P1M1|=0x08;P1M2|=0x08
+#define    P14_OPENDRAIN_MODE        clr_SFRS_SFRPAGE;P1M1|=0x10;P1M2|=0x10
+#define    P15_OPENDRAIN_MODE        clr_SFRS_SFRPAGE;P1M1|=0x20;P1M2|=0x20
+#define    P16_OPENDRAIN_MODE        clr_SFRS_SFRPAGE;P1M1|=0x40;P1M2|=0x40
+#define    P17_OPENDRAIN_MODE        clr_SFRS_SFRPAGE;P1M1|=0x80;P1M2|=0x80
+#define    P30_OPENDRAIN_MODE        clr_SFRS_SFRPAGE;P3M1|=0x01;P3M2|=0x01
+#define    ALL_GPIO_OPENDRAIN_MODE   clr_SFRS_SFRPAGE;P0M1=0xFF;P0M2=0xFF;P1M1=0xFF;P1M2=0xFF;P3M1=0xFF;P3M2=0xFF
 
 /****************************************************************************
    Enable INT port 0~3
@@ -574,36 +563,46 @@ extern bit BIT_TMP;
 //--------- PMW clock source select define ---------------------
 #define    PWM_CLOCK_FSYS                    CKCON&=0xBF
 #define    PWM_CLOCK_TIMER1                  CKCON|=0x40
+/*--------- PWM type define ------------------------------------*/ 
+#define    PWM_EDGE_TYPE                     PWMCON1&=0xEF
+#define    PWM_CENTER_TYPE                   PWMCON1|=0x10      
+/*--------- PWM mode define ------------------------------------*/ 
+#define    PWM_IMDEPENDENT_MODE              PWMCON1&=0x3F                
+#define    PWM_COMPLEMENTARY_MODE            PWMCON1&=0x3F;PWMCON1|=0x40 
+#define    PWM_SYNCHRONIZED_MODE             PWMCON1&=0x3F;PWMCON1|=0x80 
+#define    PWM_GP_MODE_ENABLE                PWMCON1|=0x20                
+#define    PWM_GP_MODE_DISABLE               PWMCON1&=0xDF
 //--------- PWM clock devide define ----------------------------
-#define    PWM_CLOCK_DIV_2                   PWMCON1|=0x01;PWMCON1&=0xF9
-#define    PWM_CLOCK_DIV_4                   PWMCON1|=0x02;PWMCON1&=0xFA
-#define    PWM_CLOCK_DIV_8                   PWMCON1|=0x03;PWMCON1&=0xFB
-#define    PWM_CLOCK_DIV_16                  PWMCON1|=0x04;PWMCON1&=0xFC
-#define    PWM_CLOCK_DIV_32                  PWMCON1|=0x05;PWMCON1&=0xFD
-#define    PWM_CLOCK_DIV_64                  PWMCON1|=0x06;PWMCON1&=0xFE
-#define    PWM_CLOCK_DIV_128                 PWMCON1|=0x07
+#define    PWM_CLOCK_DIV_2                   PWMCON1&=0xF8;PWMCON1|=0x01
+#define    PWM_CLOCK_DIV_4                   PWMCON1&=0xF8;PWMCON1|=0x02
+#define    PWM_CLOCK_DIV_8                   PWMCON1&=0xF8;PWMCON1|=0x03
+#define    PWM_CLOCK_DIV_16                  PWMCON1&=0xF8;PWMCON1|=0x04
+#define    PWM_CLOCK_DIV_32                  PWMCON1&=0xF8;PWMCON1|=0x05
+#define    PWM_CLOCK_DIV_64                  PWMCON1&=0xF8;PWMCON1|=0x06
+#define    PWM_CLOCK_DIV_128                 PWMCON1|=0x07                                        
 /* --------- PWM I/O select define ------------------------------*/ 
-#define    PWM5_P15_OUTPUT_ENABLE            BIT_TMP=EA;EA=0;TA=0xAA;TA=0x55;SFRS|=0x01;PIOCON1|=0x20;TA=0xAA;TA=0x55;SFRS&=0xFE;EA=BIT_TMP        //P1.5 as PWM5 output enable
-#define    PWM5_P03_OUTPUT_ENABLE            PIOCON0|=0x20                                                    //P0.3 as PWM5
-#define    PWM4_P01_OUTPUT_ENABLE            PIOCON0|=0x10                                                    //P0.1 as PWM4 output enable
-#define    PWM3_P04_OUTPUT_ENABLE            BIT_TMP=EA;EA=0;TA=0xAA;TA=0x55;SFRS|=0x01;PIOCON1|=0x08;TA=0xAA;TA=0x55;SFRS&=0xFE;EA=BIT_TMP        //P0.4 as PWM3 output enable
-#define    PWM3_P00_OUTPUT_ENABLE            PIOCON0|=0x08                                                    //P0.0 as PWM3 
-#define    PWM2_P05_OUTPUT_ENABLE            BIT_TMP=EA;EA=0;TA=0xAA;TA=0x55;SFRS|=0x01;PIOCON1|=0x04;TA=0xAA;TA=0x55;SFRS&=0xFE;EA=BIT_TMP        //P1.0 as PWM2 output enable
-#define    PWM2_P10_OUTPUT_ENABLE            PIOCON0|=0x04                                                    //P1.0 as PWM2
-#define    PWM1_P14_OUTPUT_ENABLE            BIT_TMP=EA;EA=0;TA=0xAA;TA=0x55;SFRS|=0x01;PIOCON1|=0x02;TA=0xAA;TA=0x55;SFRS&=0xFE;EA=BIT_TMP        //P1.4 as PWM1 output enable
-#define    PWM1_P11_OUTPUT_ENABLE            PIOCON0|=0x02                                                    //P1.1 as PWM1 
-#define    PWM0_P12_OUTPUT_ENABLE            PIOCON0|=0x01                                                    //P1.2 as PWM0 output enable
+#define    PWM5_P15_OUTPUT_ENABLE            set_SFRS_SFRPAGE;PIOCON1|=0x20;clr_SFRS_SFRPAGE        //P1.5 as PWM5 output enable
+#define    PWM5_P03_OUTPUT_ENABLE            PIOCON0|=0x20                                                                                 //P0.3 as PWM5
+#define    PWM4_P01_OUTPUT_ENABLE            PIOCON0|=0x10                                                                                 //P0.1 as PWM4 output enable
+#define    PWM3_P04_OUTPUT_ENABLE            set_SFRS_SFRPAGE;PIOCON1|=0x08;clr_SFRS_SFRPAGE        //P0.4 as PWM3 output enable
+#define    PWM3_P00_OUTPUT_ENABLE            PIOCON0|=0x08                                                                                 //P0.0 as PWM3 
+#define    PWM2_P05_OUTPUT_ENABLE            set_SFRS_SFRPAGE;PIOCON1|=0x04;clr_SFRS_SFRPAGE        //P1.0 as PWM2 output enable
+#define    PWM2_P10_OUTPUT_ENABLE            PIOCON0|=0x04                                                                                 //P1.0 as PWM2
+#define    PWM1_P14_OUTPUT_ENABLE            set_SFRS_SFRPAGE;PIOCON1|=0x02;clr_SFRS_SFRPAGE        //P1.4 as PWM1 output enable
+#define    PWM1_P11_OUTPUT_ENABLE            PIOCON0|=0x02                                                                                 //P1.1 as PWM1 
+#define    PWM0_P12_OUTPUT_ENABLE            PIOCON0|=0x01                                                                                 //P1.2 as PWM0 output enable
 #define    ALL_PWM_OUTPUT_ENABLE             PIOCON0=0xFF;PIOCON1=0xFF
-#define    PWM5_P15_OUTPUT_DISABLE           BIT_TMP=EA;EA=0;TA=0xAA;TA=0x55;SFRS|=0x01;PIOCON1&=0xDF;TA=0xAA;TA=0x55;SFRS&=0xFE;EA=BIT_TMP        //P1.5 as PWM5 output disable
-#define    PWM5_P03_OUTPUT_DISABLE           PIOCON0&=0xDF                                                    //P0.3 as PWM5
-#define    PWM4_P01_OUTPUT_DISABLE           PIOCON0&=0xEF                                                    //P0.1 as PWM4 output disable
-#define    PWM3_P04_OUTPUT_DISABLE           BIT_TMP=EA;EA=0;TA=0xAA;TA=0x55;SFRS|=0x01;PIOCON1&=0xF7;TA=0xAA;TA=0x55;SFRS&=0xFE;EA=BIT_TMP        //P0.4 as PWM3 output disable
-#define    PWM3_P00_OUTPUT_DISABLE           PIOCON0&=0xF7                                                    //P0.0 as PWM3 
-#define    PWM2_P05_OUTPUT_DISABLE           BIT_TMP=EA;EA=0;TA=0xAA;TA=0x55;SFRS|=0x01;PIOCON1&=0xFB;TA=0xAA;TA=0x55;SFRS&=0xFE;EA=BIT_TMP        //P1.0 as PWM2 output disable
-#define    PWM2_P10_OUTPUT_DISABLE           PIOCON0&=0xFB                                                    //P1.0 as PWM2
-#define    PWM1_P14_OUTPUT_DISABLE           BIT_TMP=EA;EA=0;TA=0xAA;TA=0x55;SFRS|=0x01;PIOCON1&=0xFD;TA=0xAA;TA=0x55;SFRS&=0xFE;EA=BIT_TMP        //P1.4 as PWM1 output disable
-#define    PWM1_P11_OUTPUT_DISABLE           PIOCON0&=0xFD                                                    //P1.1 as PWM1 
-#define    PWM0_P12_OUTPUT_DISABLE           PIOCON0&=0xFE                                                    //P1.2 as PWM0 output disable
+
+#define    PWM5_P15_OUTPUT_DISABLE           set_SFRS_SFRPAGE;PIOCON1&=0xDF;clr_SFRS_SFRPAGE        //P1.5 as PWM5 output disable
+#define    PWM5_P03_OUTPUT_DISABLE           PIOCON0&=0xDF                                                                                 //P0.3 as PWM5
+#define    PWM4_P01_OUTPUT_DISABLE           PIOCON0&=0xEF                                                                                 //P0.1 as PWM4 output disable
+#define    PWM3_P04_OUTPUT_DISABLE           set_SFRS_SFRPAGE;PIOCON1&=0xF7;clr_SFRS_SFRPAGE        //P0.4 as PWM3 output disable
+#define    PWM3_P00_OUTPUT_DISABLE           PIOCON0&=0xF7                                                                                 //P0.0 as PWM3 
+#define    PWM2_P05_OUTPUT_DISABLE           set_SFRS_SFRPAGE;PIOCON1&=0xFB;clr_SFRS_SFRPAGE        //P1.0 as PWM2 output disable
+#define    PWM2_P10_OUTPUT_DISABLE           PIOCON0&=0xFB                                                                                 //P1.0 as PWM2
+#define    PWM1_P14_OUTPUT_DISABLE           set_SFRS_SFRPAGE;PIOCON1&=0xFD;clr_SFRS_SFRPAGE        //P1.4 as PWM1 output disable
+#define    PWM1_P11_OUTPUT_DISABLE           PIOCON0&=0xFD                                                                                 //P1.1 as PWM1 
+#define    PWM0_P12_OUTPUT_DISABLE           PIOCON0&=0xFE                                                                                 //P1.2 as PWM0 output disable
 #define    ALL_PWM_OUTPUT_DISABLE            PIOCON0=0x00;PIOCON1=0x00
 //--------- PWM I/O Polarity Control ---------------------------
 #define    PWM5_OUTPUT_INVERSE               PNP|=0x20        
@@ -612,38 +611,30 @@ extern bit BIT_TMP;
 #define    PWM2_OUTPUT_INVERSE               PNP|=0x04        
 #define    PWM1_OUTPUT_INVERSE               PNP|=0x02        
 #define    PWM0_OUTPUT_INVERSE               PNP|=0x01        
-#define    PWM_OUTPUT_ALL_INVERSE            PNP=0xFF
+#define    PWM_OUTPUT_ALL_INVERSE            PNP|=0xFF
 #define    PWM5_OUTPUT_NORMAL                PNP&=0xDF        
 #define    PWM4_OUTPUT_NORMAL                PNP&=0xEF        
 #define    PWM3_OUTPUT_NORMAL                PNP&=0xF7        
 #define    PWM2_OUTPUT_NORMAL                PNP&=0xFB        
 #define    PWM1_OUTPUT_NORMAL                PNP&=0xFD        
 #define    PWM0_OUTPUT_NORMAL                PNP&=0xFE        
-#define    PWM_OUTPUT_ALL_NORMAL             PNP=0x00
-//--------- PWM type define ------------------------------------
-#define    PWM_EDGE_TYPE                     PWMCON1&=0xEF
-#define    PWM_CENTER_TYPE                   PWMCON1|=0x10
-//--------- PWM mode define ------------------------------------
-#define    PWM_IMDEPENDENT_MODE              PWMCON1&=0x3F
-#define    PWM_COMPLEMENTARY_MODE            PWMCON1|=0x40;PWMCON1&=0x7F
-#define    PWM_SYNCHRONIZED_MODE             PWMCON1|=0x80;PWMCON1&=0xBF
-#define    PWM_GP_MODE_ENABLE                PWMCON1|=0x20
-#define    PWM_GP_MODE_DISABLE               PWMCON1&=0xDF
+#define    PWM_OUTPUT_ALL_NORMAL             PNP&=0x00
+
 //--------- PMW interrupt setting ------------------------------
-#define    PWM_FALLING_INT                   BIT_TMP=EA;TA=0xAA;TA=0x55;SFRS=0x01;PWMINTC&=0xCF;TA=0xAA;TA=0x55;SFRS=0x00;EA=BIT_TMP
-#define    PWM_RISING_INT                    BIT_TMP=EA;TA=0xAA;TA=0x55;SFRS=0x01;PWMINTC|=0x10;PWMCON0&=0xDF;TA=0xAA;TA=0x55;SFRS=0x00;EA=BIT_TMP
-#define    PWM_CENTRAL_POINT_INT             BIT_TMP=EA;TA=0xAA;TA=0x55;SFRS=0x01;PWMINTC|=0x20;PWMCON0&=0xEF;TA=0xAA;TA=0x55;SFRS=0x00;EA=BIT_TMP
-#define    PWM_PERIOD_END_INT                BIT_TMP=EA;TA=0xAA;TA=0x55;SFRS=0x01;PWMINTC|=0x30;TA=0xAA;TA=0x55;SFRS=0x00;EA=BIT_TMP
+#define    PWM_FALLING_INT                   set_SFRS_SFRPAGE;PWMINTC&=0xCF;PWMINTC|=0x00;clr_SFRS_SFRPAGE
+#define    PWM_RISING_INT                    set_SFRS_SFRPAGE;PWMINTC&=0xCF;PWMINTC|=0x10;clr_SFRS_SFRPAGE
+#define    PWM_CENTRAL_POINT_INT             set_SFRS_SFRPAGE;PWMINTC&=0xCF;PWMINTC|=0x20;clr_SFRS_SFRPAGE
+#define    PWM_PERIOD_END_INT                set_SFRS_SFRPAGE;PWMINTC&=0xCF;PWMINTC|=0x30;clr_SFRS_SFRPAGE
 //--------- PWM interrupt pin select ---------------------------
-#define    PWM_INT_PWM0                      BIT_TMP=EA;TA=0xAA;TA=0x55;SFRS=0x01;PWMINTC&=0xF8;TA=0xAA;TA=0x55;SFRS=0x00;EA=BIT_TMP
-#define    PWM_INT_PWM1                      BIT_TMP=EA;TA=0xAA;TA=0x55;SFRS=0x01;PWMINTC&=0xF8;PWMINTC|=0x01;TA=0xAA;TA=0x55;SFRS=0x00;EA=BIT_TMP
-#define    PWM_INT_PWM2                      BIT_TMP=EA;TA=0xAA;TA=0x55;SFRS=0x01;PWMINTC&=0xF8;PWMINTC|=0x02;TA=0xAA;TA=0x55;SFRS=0x00;EA=BIT_TMP
-#define    PWM_INT_PWM3                      BIT_TMP=EA;TA=0xAA;TA=0x55;SFRS=0x01;PWMINTC&=0xF8;PWMINTC|=0x03;TA=0xAA;TA=0x55;SFRS=0x00;EA=BIT_TMP
-#define    PWM_INT_PWM4                      BIT_TMP=EA;TA=0xAA;TA=0x55;SFRS=0x01;PWMINTC&=0xF8;PWMINTC|=0x04;TA=0xAA;TA=0x55;SFRS=0x00;EA=BIT_TMP
-#define    PWM_INT_PWM5                      BIT_TMP=EA;TA=0xAA;TA=0x55;SFRS=0x01;PWMINTC&=0xF8;PWMINTC|=0x05;TA=0xAA;TA=0x55;SFRS=0x00;EA=BIT_TMP
+#define    PWM_INT_PWM0                      set_SFRS_SFRPAGE;PWMINTC&=0xF8;PWMINTC|=0x00;clr_SFRS_SFRPAGE
+#define    PWM_INT_PWM1                      set_SFRS_SFRPAGE;PWMINTC&=0xF8;PWMINTC|=0x01;clr_SFRS_SFRPAGE
+#define    PWM_INT_PWM2                      set_SFRS_SFRPAGE;PWMINTC&=0xF8;PWMINTC|=0x02;clr_SFRS_SFRPAGE
+#define    PWM_INT_PWM3                      set_SFRS_SFRPAGE;PWMINTC&=0xF8;PWMINTC|=0x03;clr_SFRS_SFRPAGE
+#define    PWM_INT_PWM4                      set_SFRS_SFRPAGE;PWMINTC&=0xF8;PWMINTC|=0x04;clr_SFRS_SFRPAGE
+#define    PWM_INT_PWM5                      set_SFRS_SFRPAGE;PWMINTC&=0xF8;PWMINTC|=0x05;clr_SFRS_SFRPAGE
 //--------- PWM Dead time setting ------------------------------
 #define    PWM45_DEADTIME_ENABLE             BIT_TMP=EA;EA=0;TA=0xAA;TA=0x55;PDTEN|=0x04;EA=BIT_TMP
-#define    PWM34_DEADTIME_ENABLE             BIT_TMP=EA;EA=0;TA=0xAA;TA=0x55;PDTEN|=0x02;EA=BIT_TMP
+#define    PWM23_DEADTIME_ENABLE             BIT_TMP=EA;EA=0;TA=0xAA;TA=0x55;PDTEN|=0x02;EA=BIT_TMP
 #define    PWM01_DEADTIME_ENABLE             BIT_TMP=EA;EA=0;TA=0xAA;TA=0x55;PDTEN|=0x01;EA=BIT_TMP
 
 /*****************************************************************************************
@@ -652,6 +643,15 @@ extern bit BIT_TMP;
 //--------- PMW0 clock source select define ---------------------
 #define    PWM0_CLOCK_FSYS                   CKCON&=0xBF
 #define    PWM0_CLOCK_TIMER1                 CKCON|=0x40
+/*--------- PWM type define ------------------------------------*/ 
+#define    PWM0_EDGE_TYPE                    PWMCON1&=0xEF
+#define    PWM0_CENTER_TYPE                  PWMCON1|=0x10      
+/*--------- PWM mode define ------------------------------------*/ 
+#define    PWM0_IMDEPENDENT_MODE             PWMCON1&=0x3F                
+#define    PWM0_COMPLEMENTARY_MODE           PWMCON1&=0x3F;PWMCON1|=0x40 
+#define    PWM0_SYNCHRONIZED_MODE            PWMCON1&=0x3F;PWMCON1|=0x80 
+#define    PWM0_GP_MODE_ENABLE               PWMCON1|=0x20                
+#define    PWM0_GP_MODE_DISABLE              PWMCON1&=0xDF
 //--------- PWM0 clock devide define ----------------------------
 #define    PWM0_CLOCK_DIV_2                  PWMCON1|=0x01;PWMCON1&=0xF9
 #define    PWM0_CLOCK_DIV_4                  PWMCON1|=0x02;PWMCON1&=0xFA
@@ -661,28 +661,29 @@ extern bit BIT_TMP;
 #define    PWM0_CLOCK_DIV_64                 PWMCON1|=0x06;PWMCON1&=0xFE
 #define    PWM0_CLOCK_DIV_128                PWMCON1|=0x07
 /* --------- PWM0 I/O select define ------------------------------*/ 
-#define    ENABLE_PWM0_CH5_P15_OUTPUT        BIT_TMP=EA;EA=0;TA=0xAA;TA=0x55;SFRS|=0x01;PIOCON1|=0x20;TA=0xAA;TA=0x55;SFRS&=0xFE;EA=BIT_TMP        //P1.5 as PWM5 output enable
-#define    ENABLE_PWM0_CH5_P03_OUTPUT        PIOCON0|=0x20                                                    //P0.3 as PWM5
-#define    ENABLE_PWM0_CH4_P01_OUTPUT        PIOCON0|=0x10                                                    //P0.1 as PWM4 output enable
-#define    ENABLE_PWM0_CH3_P04_OUTPUT        BIT_TMP=EA;EA=0;TA=0xAA;TA=0x55;SFRS|=0x01;PIOCON1|=0x08;TA=0xAA;TA=0x55;SFRS&=0xFE;EA=BIT_TMP        //P0.4 as PWM3 output enable
-#define    ENABLE_PWM0_CH3_P00_OUTPUT        PIOCON0|=0x08                                                    //P0.0 as PWM3 
-#define    ENABLE_PWM0_CH2_P05_OUTPUT        BIT_TMP=EA;EA=0;TA=0xAA;TA=0x55;SFRS|=0x01;PIOCON1|=0x04;TA=0xAA;TA=0x55;SFRS&=0xFE;EA=BIT_TMP        //P1.0 as PWM2 output enable
-#define    ENABLE_PWM0_CH2_P10_OUTPUT        PIOCON0|=0x04                                                    //P1.0 as PWM2
-#define    ENABLE_PWM0_CH1_P14_OUTPUT        BIT_TMP=EA;EA=0;TA=0xAA;TA=0x55;SFRS|=0x01;PIOCON1|=0x02;TA=0xAA;TA=0x55;SFRS&=0xFE;EA=BIT_TMP        //P1.4 as PWM1 output enable
-#define    ENABLE_PWM0_CH1_P11_OUTPUT        PIOCON0|=0x02                                                    //P1.1 as PWM1 
-#define    ENABLE_PWM0_CH0_P12_OUTPUT        PIOCON0|=0x01                                                    //P1.2 as PWM0 output enable
+#define    ENABLE_PWM0_CH5_P15_OUTPUT        set_SFRS_SFRPAGE;PIOCON1|=0x20;clr_SFRS_SFRPAGE        //P1.5 as PWM5 output enable 
+#define    ENABLE_PWM0_CH5_P03_OUTPUT        PIOCON0|=0x20                                                                                 //P0.3 as PWM5               
+#define    ENABLE_PWM0_CH4_P01_OUTPUT        PIOCON0|=0x10                                                                                 //P0.1 as PWM4 output enable 
+#define    ENABLE_PWM0_CH3_P04_OUTPUT        set_SFRS_SFRPAGE;PIOCON1|=0x08;clr_SFRS_SFRPAGE        //P0.4 as PWM3 output enable 
+#define    ENABLE_PWM0_CH3_P00_OUTPUT        PIOCON0|=0x08                                                                                 //P0.0 as PWM3               
+#define    ENABLE_PWM0_CH2_P05_OUTPUT        set_SFRS_SFRPAGE;PIOCON1|=0x04;clr_SFRS_SFRPAGE        //P1.0 as PWM2 output enable 
+#define    ENABLE_PWM0_CH2_P10_OUTPUT        PIOCON0|=0x04                                                                                 //P1.0 as PWM2               
+#define    ENABLE_PWM0_CH1_P14_OUTPUT        set_SFRS_SFRPAGE;PIOCON1|=0x02;clr_SFRS_SFRPAGE        //P1.4 as PWM1 output enable 
+#define    ENABLE_PWM0_CH1_P11_OUTPUT        PIOCON0|=0x02                                                                                 //P1.1 as PWM1               
+#define    ENABLE_PWM0_CH0_P12_OUTPUT        PIOCON0|=0x01                                                                                 //P1.2 as PWM0 output enable 
 #define    ENABLE_ALL_PWM0_OUTPUT            PIOCON0=0xFF;PIOCON1=0xFF
-#define    DISABLE_PWM0_CH5_P15_OUTPUT       BIT_TMP=EA;EA=0;TA=0xAA;TA=0x55;SFRS|=0x01;PIOCON1&=0xDF;TA=0xAA;TA=0x55;SFRS&=0xFE;EA=BIT_TMP        //P1.5 as PWM5 output disable
-#define    DISABLE_PWM0_CH5_P03_OUTPUT       PIOCON0&=0xDF                                                    //P0.3 as PWM5
-#define    DISABLE_PWM0_CH4_P01_OUTPUT       PIOCON0&=0xEF                                                    //P0.1 as PWM4 output disable
-#define    DISABLE_PWM0_CH3_P04_OUTPUT       BIT_TMP=EA;EA=0;TA=0xAA;TA=0x55;SFRS|=0x01;PIOCON1&=0xF7;TA=0xAA;TA=0x55;SFRS&=0xFE;EA=BIT_TMP        //P0.4 as PWM3 output disable
-#define    DISABLE_PWM0_CH3_P00_OUTPUT       PIOCON0&=0xF7                                                    //P0.0 as PWM3 
-#define    DISABLE_PWM0_CH2_P05_OUTPUT       BIT_TMP=EA;EA=0;TA=0xAA;TA=0x55;SFRS|=0x01;PIOCON1&=0xFB;TA=0xAA;TA=0x55;SFRS&=0xFE;EA=BIT_TMP        //P1.0 as PWM2 output disable
-#define    DISABLE_PWM0_CH2_P10_OUTPUT       PIOCON0&=0xFB                                                    //P1.0 as PWM2
-#define    DISABLE_PWM0_CH1_P14_OUTPUT       BIT_TMP=EA;EA=0;TA=0xAA;TA=0x55;SFRS|=0x01;PIOCON1&=0xFD;TA=0xAA;TA=0x55;SFRS&=0xFE;EA=BIT_TMP        //P1.4 as PWM1 output disable
-#define    DISABLE_PWM0_CH1_P11_OUTPUT       PIOCON0&=0xFD                                                    //P1.1 as PWM1 
-#define    DISABLE_PWM0_CH0_P12_OUTPUT       PIOCON0&=0xFE                                                    //P1.2 as PWM0 output disable
-#define    DISABLE_ALL_PWM0_OUTPUT           PIOCON0=0x00;PIOCON1=0x00
+                                                                                                  
+#define    DISABLE_PWM0_CH5_P15_OUTPUT       set_SFRS_SFRPAGE;PIOCON1&=0xDF;clr_SFRS_SFRPAGE        //P1.5 as PWM5 output disable
+#define    DISABLE_PWM0_CH5_P03_OUTPUT       PIOCON0&=0xDF                                                                                 //P0.3 as PWM5               
+#define    DISABLE_PWM0_CH4_P01_OUTPUT       PIOCON0&=0xEF                                                                                 //P0.1 as PWM4 output disable
+#define    DISABLE_PWM0_CH3_P04_OUTPUT       set_SFRS_SFRPAGE;PIOCON1&=0xF7;clr_SFRS_SFRPAGE        //P0.4 as PWM3 output disable
+#define    DISABLE_PWM0_CH3_P00_OUTPUT       PIOCON0&=0xF7                                                                                 //P0.0 as PWM3               
+#define    DISABLE_PWM0_CH2_P05_OUTPUT       set_SFRS_SFRPAGE;PIOCON1&=0xFB;clr_SFRS_SFRPAGE        //P1.0 as PWM2 output disable
+#define    DISABLE_PWM0_CH2_P10_OUTPUT       PIOCON0&=0xFB                                                                                 //P1.0 as PWM2               
+#define    DISABLE_PWM0_CH1_P14_OUTPUT       set_SFRS_SFRPAGE;PIOCON1&=0xFD;clr_SFRS_SFRPAGE        //P1.4 as PWM1 output disable
+#define    DISABLE_PWM0_CH1_P11_OUTPUT       PIOCON0&=0xFD                                                                                 //P1.1 as PWM1               
+#define    DISABLE_PWM0_CH0_P12_OUTPUT       PIOCON0&=0xFE                                                                                 //P1.2 as PWM0 output disable
+#define    DISABLE_ALL_PWM0_OUTPUT           PIOCON0=0x00;PIOCON1=0x00                                                                                                  
 //--------- PWM0 I/O Polarity Control ---------------------------
 #define    PWM0_CH5_OUTPUT_INVERSE           PNP|=0x20        
 #define    PWM0_CH4_OUTPUT_INVERSE           PNP|=0x10        
@@ -690,111 +691,106 @@ extern bit BIT_TMP;
 #define    PWM0_CH2_OUTPUT_INVERSE           PNP|=0x04        
 #define    PWM0_CH1_OUTPUT_INVERSE           PNP|=0x02        
 #define    PWM0_CH0_OUTPUT_INVERSE           PNP|=0x01        
-#define    PWM0_OUTPUT_ALL_INVERSE           PNP=0xFF
+#define    PWM0_OUTPUT_ALL_INVERSE           PNP|=0xFF
 #define    PWM0_CH5_OUTPUT_NORMAL            PNP&=0xDF        
 #define    PWM0_CH4_OUTPUT_NORMAL            PNP&=0xEF        
 #define    PWM0_CH3_OUTPUT_NORMAL            PNP&=0xF7        
 #define    PWM0_CH2_OUTPUT_NORMAL            PNP&=0xFB        
 #define    PWM0_CH1_OUTPUT_NORMAL            PNP&=0xFD        
 #define    PWM0_CH0_OUTPUT_NORMAL            PNP&=0xFE        
-#define    PWM_OUTPUT_ALL_NORMAL             PNP=0x00
-//--------- PWM0 type define ------------------------------------
-#define    PWM0_EDGE_TYPE                    PWMCON1&=0xEF
-#define    PWM0_CENTER_TYPE                  PWMCON1|=0x10
-//--------- PWM0 mode define ------------------------------------
-#define    PWM0_IMDEPENDENT_MODE             PWMCON1&=0x3F
-#define    PWM0_COMPLEMENTARY_MODE           PWMCON1|=0x40;PWMCON1&=0x7F
-#define    PWM0_SYNCHRONIZED_MODE            PWMCON1|=0x80;PWMCON1&=0xBF
-#define    PWM0_GP_MODE_ENABLE               PWMCON1|=0x20
-#define    PWM0_GP_MODE_DISABLE              PWMCON1&=0xDF
+#define    PWM0_OUTPUT_ALL_NORMAL            PNP&=0x00
+
 //--------- PMW0 interrupt setting ------------------------------
-#define    PWM0_FALLING_INT                  BIT_TMP=EA;TA=0xAA;TA=0x55;SFRS=0x01;PWMINTC&=0xCF;TA=0xAA;TA=0x55;SFRS=0x00;EA=BIT_TMP
-#define    PWM0_RISING_INT                   BIT_TMP=EA;TA=0xAA;TA=0x55;SFRS=0x01;PWMINTC|=0x10;PWMCON0&=0xDF;TA=0xAA;TA=0x55;SFRS=0x00;EA=BIT_TMP
-#define    PWM0_CENTRAL_POINT_INT            BIT_TMP=EA;TA=0xAA;TA=0x55;SFRS=0x01;PWMINTC|=0x20;PWMCON0&=0xEF;TA=0xAA;TA=0x55;SFRS=0x00;EA=BIT_TMP
-#define    PWM0_PERIOD_END_INT               BIT_TMP=EA;TA=0xAA;TA=0x55;SFRS=0x01;PWMINTC|=0x30;TA=0xAA;TA=0x55;SFRS=0x00;EA=BIT_TMP
+#define    PWM0_FALLING_INT                  set_SFRS_SFRPAGE;PWMINTC&=0xCF;PWMINTC|=0x00;clr_SFRS_SFRPAGE
+#define    PWM0_RISING_INT                   set_SFRS_SFRPAGE;PWMINTC&=0xCF;PWMINTC|=0x10;clr_SFRS_SFRPAGE
+#define    PWM0_CENTRAL_POINT_INT            set_SFRS_SFRPAGE;PWMINTC&=0xCF;PWMINTC|=0x20;clr_SFRS_SFRPAGE
+#define    PWM0_PERIOD_END_INT               set_SFRS_SFRPAGE;PWMINTC&=0xCF;PWMINTC|=0x30;clr_SFRS_SFRPAGE
 //--------- PWM0 interrupt pin select ---------------------------
-#define    PWM0_INT_PWM0                     BIT_TMP=EA;TA=0xAA;TA=0x55;SFRS=0x01;PWMINTC&=0xF8;TA=0xAA;TA=0x55;SFRS=0x00;EA=BIT_TMP
-#define    PWM0_INT_PWM1                     BIT_TMP=EA;TA=0xAA;TA=0x55;SFRS=0x01;PWMINTC&=0xF8;PWMINTC|=0x01;TA=0xAA;TA=0x55;SFRS=0x00;EA=BIT_TMP
-#define    PWM0_INT_PWM2                     BIT_TMP=EA;TA=0xAA;TA=0x55;SFRS=0x01;PWMINTC&=0xF8;PWMINTC|=0x02;TA=0xAA;TA=0x55;SFRS=0x00;EA=BIT_TMP
-#define    PWM0_INT_PWM3                     BIT_TMP=EA;TA=0xAA;TA=0x55;SFRS=0x01;PWMINTC&=0xF8;PWMINTC|=0x03;TA=0xAA;TA=0x55;SFRS=0x00;EA=BIT_TMP
-#define    PWM0_INT_PWM4                     BIT_TMP=EA;TA=0xAA;TA=0x55;SFRS=0x01;PWMINTC&=0xF8;PWMINTC|=0x04;TA=0xAA;TA=0x55;SFRS=0x00;EA=BIT_TMP
-#define    PWM0_INT_PWM5                     BIT_TMP=EA;TA=0xAA;TA=0x55;SFRS=0x01;PWMINTC&=0xF8;PWMINTC|=0x05;TA=0xAA;TA=0x55;SFRS=0x00;EA=BIT_TMP
+#define    PWM0_INT_PWM0                     set_SFRS_SFRPAGE;PWMINTC&=0xF8;PWMINTC|=0x00;clr_SFRS_SFRPAGE
+#define    PWM0_INT_PWM1                     set_SFRS_SFRPAGE;PWMINTC&=0xF8;PWMINTC|=0x01;clr_SFRS_SFRPAGE
+#define    PWM0_INT_PWM2                     set_SFRS_SFRPAGE;PWMINTC&=0xF8;PWMINTC|=0x02;clr_SFRS_SFRPAGE
+#define    PWM0_INT_PWM3                     set_SFRS_SFRPAGE;PWMINTC&=0xF8;PWMINTC|=0x03;clr_SFRS_SFRPAGE
+#define    PWM0_INT_PWM4                     set_SFRS_SFRPAGE;PWMINTC&=0xF8;PWMINTC|=0x04;clr_SFRS_SFRPAGE
+#define    PWM0_INT_PWM5                     set_SFRS_SFRPAGE;PWMINTC&=0xF8;PWMINTC|=0x05;clr_SFRS_SFRPAGE
 //--------- PWM0 Dead time setting ------------------------------
 #define    ENABLE_PWM0_CH45_DEADTIME         BIT_TMP=EA;EA=0;TA=0xAA;TA=0x55;PDTEN|=0x04;EA=BIT_TMP
-#define    ENABLE_PWM0_CH34_DEADTIME         BIT_TMP=EA;EA=0;TA=0xAA;TA=0x55;PDTEN|=0x02;EA=BIT_TMP
+#define    ENABLE_PWM0_CH23_DEADTIME         BIT_TMP=EA;EA=0;TA=0xAA;TA=0x55;PDTEN|=0x02;EA=BIT_TMP
 #define    ENABLE_PWM0_CH01_DEADTIME         BIT_TMP=EA;EA=0;TA=0xAA;TA=0x55;PDTEN|=0x01;EA=BIT_TMP
 
 /*****************************************************************************************
 * For ADC INIT setting 
 *****************************************************************************************/
-#define    ENABLE_ADC_AIN0                   ADCCON0&=0xF0;P17_INPUT_MODE;AINDIDS=0x00;AINDIDS|=0x01;ADCCON1|=0x01                  //P17
-#define    ENABLE_ADC_AIN1                   ADCCON0&=0xF0;ADCCON0|=0x01;P30_INPUT_MODE;AINDIDS=0x00;AINDIDS|=0x02;ADCCON1|=0x01    //P30
-#define    ENABLE_ADC_AIN2                   ADCCON0&=0xF0;ADCCON0|=0x02;P07_INPUT_MODE;AINDIDS=0x00;AINDIDS|=0x04;ADCCON1|=0x01    //P07
-#define    ENABLE_ADC_AIN3                   ADCCON0&=0xF0;ADCCON0|=0x03;P06_INPUT_MODE;AINDIDS=0x00;AINDIDS|=0x08;ADCCON1|=0x01    //P06
-#define    ENABLE_ADC_AIN4                   ADCCON0&=0xF0;ADCCON0|=0x04;P05_INPUT_MODE;AINDIDS=0x00;AINDIDS|=0x10;ADCCON1|=0x01    //P05
-#define    ENABLE_ADC_AIN5                   ADCCON0&=0xF0;ADCCON0|=0x05;P04_INPUT_MODE;AINDIDS=0x00;AINDIDS|=0x20;ADCCON1|=0x01    //P04
-#define    ENABLE_ADC_AIN6                   ADCCON0&=0xF0;ADCCON0|=0x06;P03_INPUT_MODE;AINDIDS=0x00;AINDIDS|=0x40;ADCCON1|=0x01    //P03
-#define    ENABLE_ADC_AIN7                   ADCCON0&=0xF0;ADCCON0|=0x07;P11_INPUT_MODE;AINDIDS=0x00;AINDIDS|=0x80;ADCCON1|=0x01    //P11
-#define    ENABLE_ADC_BANDGAP                ADCCON0|=0x08;ADCCON0&=0xF8;ADCCON1|=0x01                                              //Band-gap 1.22V
-#define    DISABLE_ADC                       ADCCON1 &= 0xFE;
+#define    ENABLE_ADC_AIN0                   clr_SFRS_SFRPAGE;ADCCON0&=0xF0;ADCCON0|=0x00;P17_INPUT_MODE;AINDIDS=0;AINDIDS|=0x01;ADCCON1|=1    //P17
+#define    ENABLE_ADC_AIN1                   clr_SFRS_SFRPAGE;ADCCON0&=0xF0;ADCCON0|=0x01;P30_INPUT_MODE;AINDIDS=0;AINDIDS|=0x02;ADCCON1|=1    //P30
+#define    ENABLE_ADC_AIN2                   clr_SFRS_SFRPAGE;ADCCON0&=0xF0;ADCCON0|=0x02;P07_INPUT_MODE;AINDIDS=0;AINDIDS|=0x04;ADCCON1|=1    //P07
+#define    ENABLE_ADC_AIN3                   clr_SFRS_SFRPAGE;ADCCON0&=0xF0;ADCCON0|=0x03;P06_INPUT_MODE;AINDIDS=0;AINDIDS|=0x08;ADCCON1|=1    //P06
+#define    ENABLE_ADC_AIN4                   clr_SFRS_SFRPAGE;ADCCON0&=0xF0;ADCCON0|=0x04;P05_INPUT_MODE;AINDIDS=0;AINDIDS|=0x10;ADCCON1|=1    //P05
+#define    ENABLE_ADC_AIN5                   clr_SFRS_SFRPAGE;ADCCON0&=0xF0;ADCCON0|=0x05;P04_INPUT_MODE;AINDIDS=0;AINDIDS|=0x20;ADCCON1|=1    //P04
+#define    ENABLE_ADC_AIN6                   clr_SFRS_SFRPAGE;ADCCON0&=0xF0;ADCCON0|=0x06;P03_INPUT_MODE;AINDIDS=0;AINDIDS|=0x40;ADCCON1|=1    //P03
+#define    ENABLE_ADC_AIN7                   clr_SFRS_SFRPAGE;ADCCON0&=0xF0;ADCCON0|=0x07;P11_INPUT_MODE;AINDIDS=0;AINDIDS|=0x80;ADCCON1|=1    //P11
 
-#define    ENABLE_ADC_CH0                    ADCCON0&=0xF0;P17_INPUT_MODE;AINDIDS=0x00;AINDIDS|=0x01;ADCCON1|=0x01                  //P17
-#define    ENABLE_ADC_CH1                    ADCCON0&=0xF0;ADCCON0|=0x01;P30_INPUT_MODE;AINDIDS=0x00;AINDIDS|=0x02;ADCCON1|=0x01    //P30
-#define    ENABLE_ADC_CH2                    ADCCON0&=0xF0;ADCCON0|=0x02;P07_INPUT_MODE;AINDIDS=0x00;AINDIDS|=0x04;ADCCON1|=0x01    //P07
-#define    ENABLE_ADC_CH3                    ADCCON0&=0xF0;ADCCON0|=0x03;P06_INPUT_MODE;AINDIDS=0x00;AINDIDS|=0x08;ADCCON1|=0x01    //P06
-#define    ENABLE_ADC_CH4                    ADCCON0&=0xF0;ADCCON0|=0x04;P05_INPUT_MODE;AINDIDS=0x00;AINDIDS|=0x10;ADCCON1|=0x01    //P05
-#define    ENABLE_ADC_CH5                    ADCCON0&=0xF0;ADCCON0|=0x05;P04_INPUT_MODE;AINDIDS=0x00;AINDIDS|=0x20;ADCCON1|=0x01    //P04
-#define    ENABLE_ADC_CH6                    ADCCON0&=0xF0;ADCCON0|=0x06;P03_INPUT_MODE;AINDIDS=0x00;AINDIDS|=0x40;ADCCON1|=0x01    //P03
-#define    ENABLE_ADC_CH7                    ADCCON0&=0xF0;ADCCON0|=0x07;P11_INPUT_MODE;AINDIDS=0x00;AINDIDS|=0x80;ADCCON1|=0x01    //P11
-#define    ENABLE_ADC_BANDGAP                ADCCON0|=0x08;ADCCON0&=0xF8;ADCCON1|=0x01                                              //Band-gap 1.22V
-#define    DISABLE_ADC                       ADCCON1 &= 0xFE;
-/* PWM trig ADC start define */           
-#define    PWM0_FALLINGEDGE_TRIG_ADC         ADCCON0&=0xDF;ADCCON0&=0xEF;ADCCON1&=0xF7;ADCCON1&=0xFB;ADCCON1|=0x02
-#define    PWM2_FALLINGEDGE_TRIG_ADC         ADCCON0&=0xDF;ADCCON0|=0x10;ADCCON1&=0xF7;ADCCON1&=0xFB;ADCCON1|=0x02
-#define    PWM4_FALLINGEDGE_TRIG_ADC         ADCCON0|=0x20;ADCCON0&=0xEF;ADCCON1&=0xF7;ADCCON1&=0xFB;ADCCON1|=0x02
-#define    PWM0_RISINGEDGE_TRIG_ADC          ADCCON0&=0xDF;ADCCON0&=0xEF;ADCCON1&=0xF7;ADCCON1|=0x04;ADCCON1|=0x02
-#define    PWM2_RISINGEDGE_TRIG_ADC          ADCCON0&=0xDF;ADCCON0|=0x10;ADCCON1&=0xF7;ADCCON1|=0x04;ADCCON1|=0x02
-#define    PWM4_RISINGEDGE_TRIG_ADC          ADCCON0|=0x20;ADCCON0&=0xEF;ADCCON1&=0xF7;ADCCON1|=0x04;ADCCON1|=0x02
-#define    PWM0_CENTRAL_TRIG_ADC             ADCCON0&=0xDF;ADCCON0&=0xEF;ADCCON1|=0x08;ADCCON1&=0xFB;ADCCON1|=0x02
-#define    PWM2_CENTRAL_TRIG_ADC             ADCCON0&=0xDF;ADCCON0|=0x10;ADCCON1|=0x08;ADCCON1&=0xFB;ADCCON1|=0x02
-#define    PWM4_CENTRAL_TRIG_ADC             ADCCON0|=0x20;ADCCON0&=0xEF;ADCCON1|=0x08;ADCCON1&=0xFB;ADCCON1|=0x02
-#define    PWM0_END_TRIG_ADC                 ADCCON0&=0xDF;ADCCON0&=0xEF;ADCCON1|=0x08;ADCCON1|=0x04;ADCCON1|=0x02
-#define    PWM2_END_TRIG_ADC                 ADCCON0&=0xDF;ADCCON0|=0x10;ADCCON1|=0x08;ADCCON1|=0x04;ADCCON1|=0x02
-#define    PWM4_END_TRIG_ADC                 ADCCON0|=0x20;ADCCON0&=0xEF;ADCCON1|=0x08;ADCCON1|=0x04;ADCCON1|=0x02
-/* PWM0 trig ADC start define */            
-#define    PWM0_CH0_FALLINGEDGE_TRIG_ADC     ADCCON0&=0xDF;ADCCON0&=0xEF;ADCCON1&=0xF7;ADCCON1&=0xFB;ADCCON1|=0x02
-#define    PWM0_CH2_FALLINGEDGE_TRIG_ADC     ADCCON0&=0xDF;ADCCON0|=0x10;ADCCON1&=0xF7;ADCCON1&=0xFB;ADCCON1|=0x02
-#define    PWM0_CH4_FALLINGEDGE_TRIG_ADC     ADCCON0|=0x20;ADCCON0&=0xEF;ADCCON1&=0xF7;ADCCON1&=0xFB;ADCCON1|=0x02
-#define    PWM0_CH0_RISINGEDGE_TRIG_ADC      ADCCON0&=0xDF;ADCCON0&=0xEF;ADCCON1&=0xF7;ADCCON1|=0x04;ADCCON1|=0x02
-#define    PWM0_CH2_RISINGEDGE_TRIG_ADC      ADCCON0&=0xDF;ADCCON0|=0x10;ADCCON1&=0xF7;ADCCON1|=0x04;ADCCON1|=0x02
-#define    PWM0_CH4_RISINGEDGE_TRIG_ADC      ADCCON0|=0x20;ADCCON0&=0xEF;ADCCON1&=0xF7;ADCCON1|=0x04;ADCCON1|=0x02
-#define    PWM0_CH0_CENTRAL_TRIG_ADC         ADCCON0&=0xDF;ADCCON0&=0xEF;ADCCON1|=0x08;ADCCON1&=0xFB;ADCCON1|=0x02
-#define    PWM0_CH2_CENTRAL_TRIG_ADC         ADCCON0&=0xDF;ADCCON0|=0x10;ADCCON1|=0x08;ADCCON1&=0xFB;ADCCON1|=0x02
-#define    PWM0_CH4_CENTRAL_TRIG_ADC         ADCCON0|=0x20;ADCCON0&=0xEF;ADCCON1|=0x08;ADCCON1&=0xFB;ADCCON1|=0x02
-#define    PWM0_CH0_END_TRIG_ADC             ADCCON0&=0xDF;ADCCON0&=0xEF;ADCCON1|=0x08;ADCCON1|=0x04;ADCCON1|=0x02
-#define    PWM0_CH2_END_TRIG_ADC             ADCCON0&=0xDF;ADCCON0|=0x10;ADCCON1|=0x08;ADCCON1|=0x04;ADCCON1|=0x02
-#define    PWM0_CH4_END_TRIG_ADC             ADCCON0|=0x20;ADCCON0&=0xEF;ADCCON1|=0x08;ADCCON1|=0x04;ADCCON1|=0x02
-/* GPIO trig ADC start define*/                                             
-#define    P04_FALLINGEDGE_TRIG_ADC          ADCCON0|=0x30;ADCCON1&=0xF3;ADCCON1|=0x02;ADCCON1&=0xBF
-#define    P13_FALLINGEDGE_TRIG_ADC          ADCCON0|=0x30;ADCCON1&=0xF3;ADCCON1|=0x02;ADCCON1|=0x40
-#define    P04_RISINGEDGE_TRIG_ADC           ADCCON0|=0x30;ADCCON1&=0xF7;ADCCON1|=0x04;ADCCON1|=0x02;ADCCON1&=0xBF
-#define    P13_RISINGEDGE_TRIG_ADC           ADCCON0|=0x30;ADCCON1&=0xF7;ADCCON1|=0x04;ADCCON1|=0x02;ADCCON1|=0x40
+#define    ENABLE_ADC_CH0                    clr_SFRS_SFRPAGE;ADCCON0&=0xF0;ADCCON0|=0x00;P17_INPUT_MODE;AINDIDS=0;AINDIDS|=0x01;ADCCON1|=1    //P17
+#define    ENABLE_ADC_CH1                    clr_SFRS_SFRPAGE;ADCCON0&=0xF0;ADCCON0|=0x01;P30_INPUT_MODE;AINDIDS=0;AINDIDS|=0x02;ADCCON1|=1    //P30
+#define    ENABLE_ADC_CH2                    clr_SFRS_SFRPAGE;ADCCON0&=0xF0;ADCCON0|=0x02;P07_INPUT_MODE;AINDIDS=0;AINDIDS|=0x04;ADCCON1|=1    //P07
+#define    ENABLE_ADC_CH3                    clr_SFRS_SFRPAGE;ADCCON0&=0xF0;ADCCON0|=0x03;P06_INPUT_MODE;AINDIDS=0;AINDIDS|=0x08;ADCCON1|=1    //P06
+#define    ENABLE_ADC_CH4                    clr_SFRS_SFRPAGE;ADCCON0&=0xF0;ADCCON0|=0x04;P05_INPUT_MODE;AINDIDS=0;AINDIDS|=0x10;ADCCON1|=1    //P05
+#define    ENABLE_ADC_CH5                    clr_SFRS_SFRPAGE;ADCCON0&=0xF0;ADCCON0|=0x05;P04_INPUT_MODE;AINDIDS=0;AINDIDS|=0x20;ADCCON1|=1    //P04
+#define    ENABLE_ADC_CH6                    clr_SFRS_SFRPAGE;ADCCON0&=0xF0;ADCCON0|=0x06;P03_INPUT_MODE;AINDIDS=0;AINDIDS|=0x40;ADCCON1|=1    //P03
+#define    ENABLE_ADC_CH7                    clr_SFRS_SFRPAGE;ADCCON0&=0xF0;ADCCON0|=0x07;P11_INPUT_MODE;AINDIDS=0;AINDIDS|=0x80;ADCCON1|=1    //P11
+
+#define    ENABLE_ADC_BANDGAP                clr_SFRS_SFRPAGE;ADCCON0&=0xF0;ADCCON0|=0x08;ADCCON0&=0xF8;ADCCON1|=1                             //Band-gap 1.22V
+#define    DISABLE_ADC                       clr_SFRS_SFRPAGE;ADCCON1&=0xFE;
+
+/* PWM trig ADC start define */ 
+
+/* PWM0 trig ADC start define */
+#define    PWM0_FALLINGEDGE_TRIG_ADC         clr_SFRS_SFRPAGE;ADCCON0&=0xCF;ADCCON0|=0x00;ADCCON1&=0xF3;ADCCON1|=0x00;ADCCON1|=0x02
+#define    PWM2_FALLINGEDGE_TRIG_ADC         clr_SFRS_SFRPAGE;ADCCON0&=0xCF;ADCCON0|=0x10;ADCCON1&=0xF3;ADCCON1|=0x00;ADCCON1|=0x02
+#define    PWM4_FALLINGEDGE_TRIG_ADC         clr_SFRS_SFRPAGE;ADCCON0&=0xCF;ADCCON0|=0x20;ADCCON1&=0xF3;ADCCON1|=0x04;ADCCON1|=0x02
+#define    PWM0_RISINGEDGE_TRIG_ADC          clr_SFRS_SFRPAGE;ADCCON0&=0xCF;ADCCON0|=0x00;ADCCON1&=0xF3;ADCCON1|=0x04;ADCCON1|=0x02
+#define    PWM2_RISINGEDGE_TRIG_ADC          clr_SFRS_SFRPAGE;ADCCON0&=0xCF;ADCCON0|=0x10;ADCCON1&=0xF3;ADCCON1|=0x04;ADCCON1|=0x02
+#define    PWM4_RISINGEDGE_TRIG_ADC          clr_SFRS_SFRPAGE;ADCCON0&=0xCF;ADCCON0|=0x20;ADCCON1&=0xF3;ADCCON1|=0x06;ADCCON1|=0x02
+#define    PWM0_CENTRAL_TRIG_ADC             clr_SFRS_SFRPAGE;ADCCON0&=0xCF;ADCCON0|=0x00;ADCCON1&=0xF3;ADCCON1|=0x08;ADCCON1|=0x02
+#define    PWM2_CENTRAL_TRIG_ADC             clr_SFRS_SFRPAGE;ADCCON0&=0xCF;ADCCON0|=0x10;ADCCON1&=0xF3;ADCCON1|=0x08;ADCCON1|=0x02
+#define    PWM4_CENTRAL_TRIG_ADC             clr_SFRS_SFRPAGE;ADCCON0&=0xCF;ADCCON0|=0x20;ADCCON1&=0xF3;ADCCON1|=0x08;ADCCON1|=0x02
+#define    PWM0_END_TRIG_ADC                 clr_SFRS_SFRPAGE;ADCCON0&=0xCF;ADCCON0|=0x00;ADCCON1&=0xF3;ADCCON1|=0x0C;ADCCON1|=0x02
+#define    PWM2_END_TRIG_ADC                 clr_SFRS_SFRPAGE;ADCCON0&=0xCF;ADCCON0|=0x10;ADCCON1&=0xF3;ADCCON1|=0x0C;ADCCON1|=0x02
+#define    PWM4_END_TRIG_ADC                 clr_SFRS_SFRPAGE;ADCCON0&=0xCF;ADCCON0|=0x20;ADCCON1&=0xF3;ADCCON1|=0x0C;ADCCON1|=0x02
+          
+#define    PWM0_CH0_FALLINGEDGE_TRIG_ADC     clr_SFRS_SFRPAGE;ADCCON0&=0xCF;ADCCON0|=0x00;ADCCON1&=0xF3;ADCCON1|=0x00;ADCCON1|=0x02
+#define    PWM0_CH2_FALLINGEDGE_TRIG_ADC     clr_SFRS_SFRPAGE;ADCCON0&=0xCF;ADCCON0|=0x10;ADCCON1&=0xF3;ADCCON1|=0x00;ADCCON1|=0x02
+#define    PWM0_CH4_FALLINGEDGE_TRIG_ADC     clr_SFRS_SFRPAGE;ADCCON0&=0xCF;ADCCON0|=0x20;ADCCON1&=0xF3;ADCCON1|=0x04;ADCCON1|=0x02
+#define    PWM0_CH0_RISINGEDGE_TRIG_ADC      clr_SFRS_SFRPAGE;ADCCON0&=0xCF;ADCCON0|=0x00;ADCCON1&=0xF3;ADCCON1|=0x04;ADCCON1|=0x02
+#define    PWM0_CH2_RISINGEDGE_TRIG_ADC      clr_SFRS_SFRPAGE;ADCCON0&=0xCF;ADCCON0|=0x10;ADCCON1&=0xF3;ADCCON1|=0x04;ADCCON1|=0x02
+#define    PWM0_CH4_RISINGEDGE_TRIG_ADC      clr_SFRS_SFRPAGE;ADCCON0&=0xCF;ADCCON0|=0x20;ADCCON1&=0xF3;ADCCON1|=0x06;ADCCON1|=0x02
+#define    PWM0_CH0_CENTRAL_TRIG_ADC         clr_SFRS_SFRPAGE;ADCCON0&=0xCF;ADCCON0|=0x00;ADCCON1&=0xF3;ADCCON1|=0x08;ADCCON1|=0x02
+#define    PWM0_CH2_CENTRAL_TRIG_ADC         clr_SFRS_SFRPAGE;ADCCON0&=0xCF;ADCCON0|=0x10;ADCCON1&=0xF3;ADCCON1|=0x08;ADCCON1|=0x02
+#define    PWM0_CH4_CENTRAL_TRIG_ADC         clr_SFRS_SFRPAGE;ADCCON0&=0xCF;ADCCON0|=0x20;ADCCON1&=0xF3;ADCCON1|=0x08;ADCCON1|=0x02
+#define    PWM0_CH0_END_TRIG_ADC             clr_SFRS_SFRPAGE;ADCCON0&=0xCF;ADCCON0|=0x00;ADCCON1&=0xF3;ADCCON1|=0x0C;ADCCON1|=0x02
+#define    PWM0_CH2_END_TRIG_ADC             clr_SFRS_SFRPAGE;ADCCON0&=0xCF;ADCCON0|=0x10;ADCCON1&=0xF3;ADCCON1|=0x0C;ADCCON1|=0x02
+#define    PWM0_CH4_END_TRIG_ADC             clr_SFRS_SFRPAGE;ADCCON0&=0xCF;ADCCON0|=0x20;ADCCON1&=0xF3;ADCCON1|=0x0C;ADCCON1|=0x02
+
+/* GPIO trig ADC start define*/
+#define    P04_FALLINGEDGE_TRIG_ADC          clr_SFRS_SFRPAGE;ADCCON0|=0x30;ADCCON1&=0xBF;ADCCON1&=0xF3;ADCCON1|=0x00;ADCCON1|=0x02
+#define    P13_FALLINGEDGE_TRIG_ADC          clr_SFRS_SFRPAGE;ADCCON0|=0x30;ADCCON1|=0x40;ADCCON1&=0xF3;ADCCON1|=0x00;ADCCON1|=0x02
+#define    P04_RISINGEDGE_TRIG_ADC           clr_SFRS_SFRPAGE;ADCCON0|=0x30;ADCCON1&=0xBF;ADCCON1&=0xF3;ADCCON1|=0x04;ADCCON1|=0x02
+#define    P13_RISINGEDGE_TRIG_ADC           clr_SFRS_SFRPAGE;ADCCON0|=0x30;ADCCON1&=0xF7;ADCCON1&=0xF3;ADCCON1|=0x04;ADCCON1|=0x02
 
 /*****************************************************************************************
 * For SPI INIT setting 
 *****************************************************************************************/
-#define    SPICLK_DIV2                       clr_SPR0;clr_SPR1
-#define    SPICLK_DIV4                       set_SPR0;clr_SPR1
-#define    SPICLK_DIV8                       clr_SPR0;set_SPR1
-#define    SPICLK_DIV16                      set_SPR0;set_SPR1
-//#define    Enable_SPI_Interrupt    set_ESPI;set_EA
+#define    SPICLK_FSYS_DIV2                  clr_SFRS_SFRPAGE;SPCR&=0xFC
+#define    SPICLK_FSYS_DIV4                  clr_SFRS_SFRPAGE;SPCR&=0xFC;SPCR|=0x01
+#define    SPICLK_FSYS_DIV8                  clr_SFRS_SFRPAGE;SPCR&=0xFC;SPCR|=0x02
+#define    SPICLK_FSYS_DIV16                 clr_SFRS_SFRPAGE;SPCR&=0xFC;SPCR|=0x03
+
 #define    SS    P15
 /*****************************************************************************************
 * For BOD enable/disable setting 
 *****************************************************************************************/
-#define    BOD_DISABLE                        TA=0xAA;TA=0x55;BODCON0&=0x7B
-#define    BOD_ENABLE                         TA=0xAA;TA=0x55;BODCON0|=0x80
-#define    BOD_RESET_ENABLE                   TA=0xAA;TA=0x55;BODCON0|=0x84
+#define    BOD_DISABLE                        BIT_TMP=EA;EA=0;TA=0xAA;TA=0x55;BODCON0&=0x7B;EA=BIT_TMP
+#define    BOD_ENABLE                         BIT_TMP=EA;EA=0;TA=0xAA;TA=0x55;BODCON0|=0x80;EA=BIT_TMP
+#define    BOD_RESET_ENABLE                   BIT_TMP=EA;EA=0;TA=0xAA;TA=0x55;BODCON0|=0x84;EA=BIT_TMP
 /*****************************************************************************************
 * For UART0 and UART1 and printf funcion 
 *****************************************************************************************/

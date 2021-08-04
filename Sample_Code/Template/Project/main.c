@@ -200,7 +200,7 @@ void PWMx_Init(uint16_t uFrequency)
 	PWM frequency   = Fpwm/((PWMPH,PWMPL)+1) = (24MHz/2)/(PWMPH,PWMPL)+1) = 20KHz
 */	
 
-	res = (24000000>>4);			// 2 ^ 4 = 16
+	res = (SYS_CLOCK>>4);			// 2 ^ 4 = 16
 	res = res/uFrequency;
 	res = res - 1;	
 
